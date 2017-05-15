@@ -1,3 +1,7 @@
+-- =============================================
+-- Author:		Eric Hernandez
+-- Create date: 5/12/17
+-- =============================================
 USE [s17guest29]
 GO
 
@@ -22,7 +26,7 @@ CREATE TABLE [dbo].[Addresses](
 
 GO
 
-/*Attendants Table*/
+/*Attendants Table*//*Organizers, presenters, volunteers, students are all attendants*/
 CREATE TABLE [dbo].[Attendants](
 	[attendantID] [int] IDENTITY(1,1) NOT NULL,
 	[firstName] [nvarchar](50) NOT NULL,
@@ -49,7 +53,7 @@ CREATE TABLE [dbo].[Cities](
 
 GO
 
-/*EventAttendantRoles Table*/
+/*EventAttendantRoles Table*//*Lookup table to check what roles a person has for an event*/
 CREATE TABLE [dbo].[EventAttendantRoles](
 	[eventID] [int] NOT NULL,
 	[attendantID] [int] NOT NULL,
@@ -79,7 +83,7 @@ CREATE TABLE [dbo].[Events](
 
 GO
 
-/*EventVendorTables Table*/
+/*EventVendorTables Table*//*Look up table that determines which tables are associated with which vendor at what event.*/
 CREATE TABLE [dbo].[EventVendorTables](
 	[eventID] [int] NOT NULL,
 	[vendorID] [int] NOT NULL,
@@ -94,7 +98,7 @@ CREATE TABLE [dbo].[EventVendorTables](
 
 GO
 
-/*Grades Table*/
+/*Grades Table*//*Overall grade for a presentation accumulated by students averages*/
 CREATE TABLE [dbo].[Grades](
 	[gradeID] [int] IDENTITY(1,1) NOT NULL,
 	[presentationID] [int] NOT NULL,
@@ -107,7 +111,7 @@ CREATE TABLE [dbo].[Grades](
 
 GO
 
-/*Levels Table*/
+/*Levels Table*//*There are only 4 levels: beginner. intermediate, advance, and non techical*/
 CREATE TABLE [dbo].[Levels](
 	[levelID] [int] IDENTITY(1,1) NOT NULL,
 	[levelDifficulty] [nvarchar](50) NOT NULL,
@@ -119,15 +123,15 @@ CREATE TABLE [dbo].[Levels](
 
 GO
 
-/*Presentations Table*/
+/*Presentations Table*//*Treated like as the class since the values overlap*/
 CREATE TABLE [dbo].[Presentations](
 	[presentationID] [int] IDENTITY(1,1) NOT NULL,
 	[title] [nvarchar](255) NOT NULL,
-	[description] [nvarchar](255) NULL,
-	[levelID] [int] NULL,
+	[description] [nvarchar](255) NULL,/*This is null because of the way stored procedured will be executed*/
+	[levelID] [int] NULL,/*This is null because of the way stored procedured will be executed*/
 	[presenterID] [int] NOT NULL,
-	[eventID] [int] NULL,
-	[trackID] [int] NULL,
+	[eventID] [int] NULL,/*This is the proposed event where the presentation would occur. A presentation is not finalized until it is in the schedules table*/
+	[trackID] [int] NULL,/*This is the proposed track that the presentation would most likely be a part of*/
  CONSTRAINT [PK_Presentations] PRIMARY KEY CLUSTERED 
 (
 	[presentationID] ASC
@@ -136,7 +140,7 @@ CREATE TABLE [dbo].[Presentations](
 
 GO
 
-/*Presenters Table*/
+/*Presenters Table*//*Explicit table for which attendants are a presenter. This table is associated with the presentations os only presenters can present*/
 CREATE TABLE [dbo].[Presenters](
 	[presenterID] [int] IDENTITY(1,1) NOT NULL,
 	[attendantID] [int] NOT NULL,
@@ -148,7 +152,7 @@ CREATE TABLE [dbo].[Presenters](
 
 GO
 
-/*Regions Table*/
+/*Regions Table*//*Regions inclde: us/canada, latin america, asia...*/
 CREATE TABLE [dbo].[Regions](
 	[regionID] [int] IDENTITY(1,1) NOT NULL,
 	[regionName] [nvarchar](50) NOT NULL,
@@ -160,7 +164,7 @@ CREATE TABLE [dbo].[Regions](
 
 GO
 
-/*Roles Table*/
+/*Roles Table*//*The only roles are: organizer, volunteer, student...*/
 CREATE TABLE [dbo].[Roles](
 	[roleID] [int] IDENTITY(1,1) NOT NULL,
 	[roleName] [nvarchar](50) NOT NULL,
@@ -186,7 +190,7 @@ CREATE TABLE [dbo].[Rooms](
 
 GO
 
-/*Schedules Table*/
+/*Schedules Table*//*This is where proposed presentations will be finilized with a room and start and end time*/
 CREATE TABLE [dbo].[Schedules](
 	[scheduleID] [int] NOT NULL,
 	[presentationID] [int] NOT NULL,
@@ -213,7 +217,7 @@ CREATE TABLE [dbo].[States](
 
 GO
 
-/*Tables Table*/
+/*Tables Table*//*For table vendors can use at an event. There should only be 10 entried in this table*/
 CREATE TABLE [dbo].[Tables](
 	[tableID] [int] IDENTITY(1,1) NOT NULL,
 	[condition] [nvarchar](50) NULL,
@@ -237,7 +241,7 @@ CREATE TABLE [dbo].[Tracks](
 
 GO
 
-/*VendorRankings Table*/
+/*VendorRankings Table*//*Sperates vendor categories ie bronze, silver, gold, platimun*/
 CREATE TABLE [dbo].[VendorRankings](
 	[vendorRankingID] [int] IDENTITY(1,1) NOT NULL,
 	[ranking] [nvarchar](50) NOT NULL,
@@ -262,7 +266,7 @@ CREATE TABLE [dbo].[Vendors](
 
 GO
 
-/*Venues Table*/
+/*Venues Table*//*used to associate an event with a location*/
 CREATE TABLE [dbo].[Venues](
 	[venueID] [int] IDENTITY(1,1) NOT NULL,
 	[addressID] [int] NOT NULL,
@@ -444,7 +448,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 
-CREATE PROCEDURE [dbo].[InsertAttendant]/*Helper*/
+CREATE PROCEDURE [dbo].[InsertAttendant]/*Helper stored procedure to insert speakers into the attendants table and associate them with the presenters table*/
 	@name nvarchar(255)
 AS
 BEGIN
@@ -453,7 +457,7 @@ BEGIN
 	SET NOCOUNT ON;
 	
 	DECLARE 
-	@firstName nvarchar(100),
+	@firstName nvarchar(100),/*Splits single name into first and last and inserts into attendants then presenters */
 	@lastName  nvarchar(100)
 	
 	SET @firstName =  SUBSTRING(@name, 1, CHARINDEX(' ', @name) - 1)
@@ -532,7 +536,7 @@ VALUES
 (630, '5/20/2017', 'Brisbane', (SELECT regionID FROM Regions WHERE regionName = 'Asia Pacific')),
 (599, '5/27/2017', 'Plovdiv', (SELECT regionID FROM Regions WHERE regionName = 'Europe/Middle East/Africa')),
 (638, '5/27/2017', 'Philadelphia', (SELECT regionID FROM Regions WHERE regionName = 'Canada/US')),
-(001, '5/14/2017', 'All Events', (SELECT regionID FROM Regions WHERE regionName = 'All Regions'))
+(001, '5/14/2017', 'All Events', (SELECT regionID FROM Regions WHERE regionName = 'All Regions'))/*Used for presentation that occur at all events like registration*/
 
 EXECUTE  InsertAttendant 'Steve Simon'
 EXECUTE  InsertAttendant 'Jeremiah Peschka'

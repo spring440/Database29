@@ -10,6 +10,9 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[selectPresentation] 
 	-- Add the parameters for the stored procedure here
+	
+	/*Parameter is a single string for a name*/
+	/*Example: EXECUTE selectPresentation 'Steve Simon'*/
 	@speaker nvarchar(70)
 AS
 BEGIN
@@ -17,7 +20,8 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
-
+	
+	/*Splitting single name string into two and getting presentation based off presenterID associated with and attendant*/
     DECLARE 
 	@firstName nvarchar(100),
 	@lastName  nvarchar(100)

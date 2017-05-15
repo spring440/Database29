@@ -11,6 +11,7 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[insertPresentation]
 	
+	/*Parameters for stored procedure: Taking ina name and presentation title*/
 	@speaker nvarchar(50),
 	@presentation nvarchar(255)
 
@@ -26,11 +27,12 @@ BEGIN
 	@firstName nvarchar(100),
 	@lastName  nvarchar(100)
 	
+	/*Splitting input name string into first and last name*/
 	SET @firstName =  SUBSTRING(@speaker, 1, CHARINDEX(' ', @speaker) - 1)
 	SET @lastName =  REVERSE(SUBSTRING(REVERSE(@speaker), 1, CHARINDEX(' ', REVERSE(@speaker)) - 1))
 	
 	
-	/*If name doesnt exist insert into attendants table and presenters table and insert presentation with associated presenter*/
+	/*If name doesnt exist insert into attendants table then presenters table and insert presentation with associated presenter*/
 	IF NOT EXISTS(SELECT firstName FROM Attendants WHERE firstName= @firstName) AND NOT EXISTS(SELECT lastName FROM Attendants WHERE firstName= @lastName)
 	BEGIN
 		
