@@ -8,8 +8,10 @@ GO
 -- Create date: 5/12/17
 -- Description:	Retrieved presentation given a track that are in the Budapest
 -- =============================================
-CREATE PROCEDURE [dbo].[PresentationsPerTrack]
+CREATE PROCEDURE [dbo].[presentationsPerTrack]
 	-- Add the parameters for the stored procedure here
+	@trackID int
+	
 AS
 BEGIN 
 	BEGIN TRY
@@ -18,12 +20,13 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT Presentations.title, Tracks.topic, Events.eventName
+	SELECT Presentations.title, Attendants.firstName, Attendants.lastName, Events.eventName, Tracks.topic
 	FROM Presentations
 	INNER JOIN Tracks ON Presentations.trackID = Tracks.trackID
 	INNER JOIN Events ON Presentations.eventID = Events.eventID
-	WHERE Events.eventName = 'Budapest' 
-	ORDER BY Tracks.topic
+	INNER JOIN Presenters ON Presentations.presenterID = Presenters.presenterID
+	INNER JOIN Attendants ON Attendants.attendantID = Presenters.attendantID
+	WHERE  Tracks.trackID = @trackID AND Events.eventName LIKE '%Budapest%' 
 	END TRY
 	BEGIN CATCH
 		PRINT 'There was an error'
